@@ -24,9 +24,7 @@ export const Navbar = () => {
         <header className="sticky top-0 z-50 w-full glass-card border-b border-white/20 dark:border-white/10">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-                        <span className="material-symbols-rounded">pets</span>
-                    </div>
+                    <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
                     <div>
                         <h1 className="font-bold text-lg leading-tight">Image Classification Platform</h1>
                         <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">

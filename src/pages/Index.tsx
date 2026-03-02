@@ -95,13 +95,13 @@ const Index = () => {
       <div className="fixed inset-0 z-[-2] lab-bg opacity-40" />
 
       {/* Mascot Layer */}
-      <div className="fixed inset-0 z-[-1] flex items-center justify-center pointer-events-none">
+      {/* <div className="fixed inset-0 z-[-1] flex items-center justify-center pointer-events-none">
         <img
           src="/cat-classify_transparent.webp"
           alt="Mascot"
           className="w-[500px] h-auto object-contain mascot-float opacity-30"
         />
-      </div>
+      </div> */}
 
       {/* Content Layer */}
       <div className="relative z-[0]">
@@ -137,15 +137,16 @@ const Index = () => {
 
         <footer className="mt-20 py-12 px-6 glass-card border-t border-white/20 dark:border-white/10 text-center">
           <div className="max-w-2xl mx-auto space-y-6">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-              CAT BREED CLASSIFIER PLATFORM &copy; 2026
-            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-loose max-w-sm mx-auto">
               Educational project for AI System Integration. Department of<br />
               Computer and Information Sciences, KMUTNB.
             </p>
+            <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+              Bethezank Lab &copy; 2026
+            </div>
           </div>
         </footer>
+        
       </div>
     </div>
   );

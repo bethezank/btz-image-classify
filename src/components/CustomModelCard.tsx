@@ -30,12 +30,12 @@ export const CustomModelCard = ({
 }: CustomModelCardProps) => {
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="flex flex-col items-start gap-2 mb-6">
+                <h3 className="text-3xl font-extrabold uppercase tracking-wide">เลือกใช้โมเดล AI ของคุณ</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)</p>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-12 justify-center items-start">
                 <div className="space-y-8 text-left">
-                    <div className="flex flex-col items-start gap-2 mb-6">
-                        <h3 className="text-3xl font-extrabold uppercase tracking-wide">เลือกใช้โมเดลของคุณ</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)</p>
-                    </div>
 
                     <div className="grid gap-6">
                         <FileUploadCard
@@ -108,7 +108,7 @@ export const CustomModelCard = ({
                                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
                                 </div>
                                 <div className="space-y-4">
-                                    {predictions.slice(0, 3).map((p, i) => {
+                                    {predictions.slice(0, 5).map((p, i) => {
                                         const barColors = ["bg-primary", "bg-blue-400", "bg-purple-400"];
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (
