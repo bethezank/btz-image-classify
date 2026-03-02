@@ -33,12 +33,7 @@ export const Navbar = () => {
                             Computer and Information Sciences, KMUTNB
                         </p>
                     </div>
-                </div>
-                <div className="hidden md:flex flex-col items-end mr-4">
-                    <span className="text-sm font-medium">Department of Applied Science</span>
-                    <span className="text-[11px] text-slate-500">Fine-Tuned Models (GoogleNet/SqueezeNet)</span>
-                </div>
-                <button
+                </div>                <button
                     onClick={toggleDarkMode}
                     className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
                 >

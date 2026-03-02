@@ -32,11 +32,9 @@ export const CustomModelCard = ({
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
                 <div className="space-y-8 text-left">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-2xl">
-                            <span className="material-symbols-rounded">upload</span>
-                        </div>
-                        <h3 className="text-3xl font-extrabold uppercase tracking-wide">Upload Your Model</h3>
+                    <div className="flex flex-col items-start gap-2 mb-6">
+                        <h3 className="text-3xl font-extrabold uppercase tracking-wide">เลือกใช้โมเดลของคุณ</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)</p>
                     </div>
 
                     <div className="grid gap-6">

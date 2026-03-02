@@ -51,16 +51,16 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
 
                     <div className="space-y-4">
                         <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                            ทดลองใช้ AI <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">ระบุสายพันธุ์แมว</span>
+                            ทดลองใช้ AI ของเรา<br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">เพื่อระบุสายพันธุ์แมว</span>
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
-                            สัมผัสความเร็วแรงของการจำแนกสายพันธุ์แมวด้วย GoogleNet หรือ SqueezeNet โดยตรงในบราวเซอร์ของคุณ
+                            ทดสอบการจำแนกสายพันธุ์แมวด้วยโมเดลเรา Fine-tune จาก GoogleNet หรือ SqueezeNet โดยตรงในบราวเซอร์ของคุณ
                         </p>
                     </div>
 
                     <div className="space-y-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">SELECT MODEL ARCHITECTURE</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">เลือกโมเดล</p>
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={() => handleModelSelect("GoogleNet-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
@@ -97,7 +97,7 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                     </div>
 
                     <div className="space-y-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">UPLOAD SAMPLE IMAGE</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">อัปโหลดรูปภาพแมวที่ต้องการทำนาย</p>
                         <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-2 text-center hover:bg-white/50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col items-center justify-center">
                             <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -115,7 +115,7 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                         className="w-full md:w-auto px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
                         {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <span className="material-symbols-rounded">analytics</span>}
-                        {isLoading ? "ANALYZING..." : "ANALYZE BREED NOW"}
+                        {isLoading ? "กำลังทำนาย..." : "ทำนายเลย !"}
                     </button>
                 </div>
 
@@ -142,7 +142,7 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                         {predictions.length > 0 && !isLoading && (
                             <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
                                 </div>
                                 <div className="space-y-4">
                                     {predictions.slice(0, 3).map((p, i) => {
