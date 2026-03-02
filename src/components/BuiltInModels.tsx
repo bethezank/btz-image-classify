@@ -49,7 +49,7 @@ export const BuiltInModels = ({ activeModel, onSelectModel }: BuiltInModelsProps
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
             <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-3 flex items-center justify-center gap-2">
+                <h3 className="text-2xl font-semibold mb-3 flex items-center justify-center gap-2">
                     <Brain className="w-7 h-7 text-primary" />
                     ทดลองใช้งานโมเดล Build-in
                 </h3>

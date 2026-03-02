@@ -1,9 +1,17 @@
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
 import type { InferenceSession } from "onnxruntime-web";
 import { GoogleIcon } from "./icons/GoogleIcon";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Prediction {
     className: string;
@@ -21,6 +29,22 @@ export const HeroCard = () => {
     const [classLabels, setClassLabels] = useState<string[]>([]);
     const [predictions, setPredictions] = useState<Prediction[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [builtInClassLabels, setBuiltInClassLabels] = useState<string[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    // Load built-in class labels on mount
+    useEffect(() => {
+        const loadBuiltInLabels = async () => {
+            try {
+                const response = await fetch("/classes/classNames-cat.json");
+                const labels = await response.json();
+                setBuiltInClassLabels(labels);
+            } catch (error) {
+                console.error("Failed to load class labels:", error);
+            }
+        };
+        loadBuiltInLabels();
+    }, []);
 
     const handleModelSelect = async (name: string, modelUrl: string, classUrl: string) => {
         setFetchingModel(name);
@@ -102,7 +126,8 @@ export const HeroCard = () => {
 
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
-            <div className="space-y-4">
+
+            <div className="mb-6 space-y-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
                     <span className="material-symbols-rounded text-base">auto_awesome</span>
                     Built-in Intelligence
@@ -117,18 +142,20 @@ export const HeroCard = () => {
                     </p>
                 </div>
             </div>
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
 
                 {/* LEFT COLUMN: Controls */}
                 <div className="space-y-8">
+                    {/* Section: เลือกโมเดล */}
                     <div className="space-y-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">เลือกโมเดล</p>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">เลือกโมเดล</p>
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={() => handleModelSelect("GoogleNet-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet-cat"
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
                                     : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
@@ -136,15 +163,15 @@ export const HeroCard = () => {
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <GoogleIcon className="w-5 h-5" />
-                                 )}
-                                <span className="font-semibold">GoogleNet</span>
+                                )}
+                                <span className="font-semibold">GoogleNet (Original)</span>
                             </button>
 
                             <button
                                 onClick={() => handleModelSelect("SqueezeNet-cat", "/models/trainedSqueezeNet-cat.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "SqueezeNet-cat"
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
                                     : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
@@ -155,11 +182,70 @@ export const HeroCard = () => {
                                 )}
                                 <span className="font-semibold">SqueezeNet</span>
                             </button>
+
+                            <button
+                                onClick={() => handleModelSelect("GoogleNet-FT-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
+                                disabled={!!fetchingModel}
+                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet-FT-cat"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
+                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
+                                    }`}
+                            >
+                                {fetchingModel === "GoogleNet-FT-cat" ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    <GoogleIcon className="w-5 h-5" />
+                                )}
+                                <span className="font-semibold">GoogleNet (Fine-Tune)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Section: ดู Class Labels */}
+                    <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Class Labels</p>
+                        <div className="flex flex-wrap gap-4">
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <button
+                                        className="flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary group"
+                                    >
+                                        <Eye className="w-5 h-5 text-slate-400 group-hover:text-primary" />
+                                        <span className="font-semibold">ดู Class Labels</span>
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                            <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
+                                            Class Labels
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            รายการสายพันธุ์แมว 10 ชนิดที่โมเดลสามารถจำแนกได้
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="mt-4 space-y-2">
+                                        {builtInClassLabels.map((label, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
+                                            >
+                                                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="font-medium capitalize">
+                                                    {label.replace(/_/g, " ")}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">อัปโหลดรูปภาพแมวที่ต้องการทำนาย</p>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">อัปโหลดรูปภาพแมวที่ต้องการทำนาย</p>
                         <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-2 text-center hover:bg-white/50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col items-center justify-center">
                             <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -174,7 +260,7 @@ export const HeroCard = () => {
                     <button
                         onClick={handlePredict}
                         disabled={!selectedImage || !activeModel || isLoading}
-                        className="w-full md:w-auto px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        className="w-full md:w-auto px-10 py-4 bg-primary text-white font-semibold rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
                         {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <span className="material-symbols-rounded">analytics</span>}
                         {isLoading ? "กำลังทำนาย..." : "ทำนายเลย !"}
@@ -195,7 +281,7 @@ export const HeroCard = () => {
                             ) : (
                                 <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
                                     <span className="material-symbols-rounded text-6xl">image</span>
-                                    <p className="font-bold tracking-widest uppercase text-xs">Waiting for Image</p>
+                                    <p className="font-semibold tracking-widest uppercase text-xs">Waiting for Image</p>
                                 </div>
                             )}
                         </div>
@@ -203,7 +289,7 @@ export const HeroCard = () => {
                         {predictions.length > 0 && !isLoading && (
                             <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
                                 </div>
                                 <div className="space-y-4">
                                     {predictions.slice(0, 5).map((p, i) => {
@@ -211,7 +297,7 @@ export const HeroCard = () => {
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (
                                             <div key={i} className="space-y-2">
-                                                <div className="flex justify-between text-sm font-bold">
+                                                <div className="flex justify-between text-sm font-semibold">
                                                     <span>{p.className}</span>
                                                     <span>{percent}%</span>
                                                 </div>

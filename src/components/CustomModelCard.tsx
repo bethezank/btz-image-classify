@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { FileUploadCard } from "./FileUploadCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
 import type { InferenceSession } from "onnxruntime-web";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Prediction {
     className: string;
@@ -22,13 +30,14 @@ export const CustomModelCard = () => {
     const [predictions, setPredictions] = useState<Prediction[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [hasSession, setHasSession] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const handleLoadModel = async () => {
         if (!onnxFile || !classFile) {
-            toast({ 
-                title: "Missing Files", 
-                description: "Please upload ONNX and JSON files.", 
-                variant: "destructive" 
+            toast({
+                title: "ไฟล์ไม่ครบถ้วน",
+                description: "กรุณาอัปโหลดไฟล์ ONNX และ JSON",
+                variant: "destructive"
             });
             return;
         }
@@ -43,13 +52,13 @@ export const CustomModelCard = () => {
             setClassLabels(loadedLabels);
             setHasSession(true);
             toast({
-                title: "Model Registered",
-                description: "Custom model is ready for inference.",
+                title: "โมเดลพร้อมใช้งาน",
+                description: "โมเดลของคุณพร้อมสำหรับการทำนายแล้ว",
             });
         } catch (e) {
             toast({
-                title: "Load Failed",
-                description: "Could not initialize ONNX session.",
+                title: "โหลดโมเดลล้มเหลว",
+                description: "ไม่สามารถเริ่มต้น ONNX session ได้",
                 variant: "destructive"
             });
             console.error(e);
@@ -60,18 +69,18 @@ export const CustomModelCard = () => {
 
     const handlePredict = async () => {
         if (!session || !classLabels.length) {
-            toast({ 
-                title: "Model Not Ready", 
-                description: "Please load a model first.", 
-                variant: "destructive" 
+            toast({
+                title: "โมเดลยังไม่พร้อม",
+                description: "กรุณาโหลดโมเดลก่อน",
+                variant: "destructive"
             });
             return;
         }
         if (!imageFile) {
-            toast({ 
-                title: "Missing Image", 
-                description: "Please upload an image to analyze.", 
-                variant: "destructive" 
+            toast({
+                title: "ไม่มีรูปภาพ",
+                description: "กรุณาอัปโหลดรูปภาพเพื่อวิเคราะห์",
+                variant: "destructive"
             });
             return;
         }
@@ -82,9 +91,9 @@ export const CustomModelCard = () => {
             const results = await runInference(session, inputTensor, classLabels);
             setPredictions(results);
         } catch (error) {
-            toast({ 
-                title: "Analysis Failed", 
-                variant: "destructive" 
+            toast({
+                title: "การวิเคราะห์ล้มเหลว",
+                variant: "destructive"
             });
             console.error(error);
         } finally {
@@ -112,8 +121,13 @@ export const CustomModelCard = () => {
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
             <div className="flex flex-col items-start gap-2 mb-6">
-                <h3 className="text-3xl font-extrabold uppercase tracking-wide">เลือกใช้โมเดล AI ของคุณ</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)</p>
+                <h3 className="text-2xl font-semibold mb-3 flex items-center justify-center gap-2">
+                    <Upload className="w-7 h-7 text-primary" />
+                    เลือกใช้โมเดล AI ของคุณ
+                </h3>
+                <p className="text-muted-foreground text-base">
+                    เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)
+                </p>
             </div>
             <div className="grid lg:grid-cols-2 gap-12 justify-center items-start">
                 <div className="space-y-8 text-left">
@@ -145,21 +159,64 @@ export const CustomModelCard = () => {
                         />
                     </div>
 
+                    {/* Section: Preview Labels */}
+                    {classLabels.length > 0 && (
+                        <div className="space-y-4">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">ดู Class Labels</p>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <button
+                                        className="flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary group"
+                                    >
+                                        <Eye className="w-5 h-5 text-slate-400 group-hover:text-primary" />
+                                        <span className="font-semibold">ดู Class Labels</span>
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+                                            <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
+                                            Class Labels
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            รายการสายพันธุ์แมว {classLabels.length} ชนิดที่โมเดลสามารถจำแนกได้
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="mt-4 space-y-2">
+                                        {classLabels.map((label, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
+                                            >
+                                                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="font-medium capitalize">
+                                                    {label.replace(/_/g, " ")}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row gap-4">
                         <button
                             onClick={handleLoadModel}
                             disabled={isLoading || !onnxFile || !classFile}
-                            className="flex-1 px-8 py-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm"
+                            className="flex-1 px-8 py-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm"
                         >
-                            {isLoading && !hasSession ? "Registering..." : "1. Register Model"}
+                            {isLoading && !hasSession ? "กำลังโหลด..." : "1. โหลดโมเดลเข้าระบบ"}
                         </button>
                         <button
                             onClick={handlePredict}
                             disabled={isLoading || !hasSession || !imageFile}
-                            className="flex-1 px-8 py-4 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/30 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 disabled:hover:translate-y-0"
+                            className="flex-1 px-8 py-4 rounded-2xl bg-primary text-white font-semibold shadow-xl shadow-primary/30 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 disabled:hover:translate-y-0"
                         >
                             {isLoading && hasSession ? <Loader2 className="w-5 h-5 animate-spin" /> : <span className="material-symbols-rounded block">analytics</span>}
-                            {isLoading && hasSession ? "Analyzing..." : "2. Analyze Breed"}
+                            {isLoading && hasSession ? "กำลังทำนาย..." : "2. ทำนายเลย !"}
                         </button>
                     </div>
                 </div>
@@ -178,7 +235,7 @@ export const CustomModelCard = () => {
                             ) : (
                                 <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
                                     <span className="material-symbols-rounded text-6xl">image</span>
-                                    <p className="font-bold tracking-widest uppercase text-xs">Waiting for Image</p>
+                                    <p className="font-semibold tracking-widest uppercase text-xs">Waiting for Image</p>
                                 </div>
                             )}
                         </div>
@@ -186,7 +243,7 @@ export const CustomModelCard = () => {
                         {predictions.length > 0 && !isLoading && (
                             <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
                                 </div>
                                 <div className="space-y-4">
                                     {predictions.slice(0, 5).map((p, i) => {
@@ -194,7 +251,7 @@ export const CustomModelCard = () => {
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (
                                             <div key={i} className="space-y-2">
-                                                <div className="flex justify-between text-sm font-bold">
+                                                <div className="flex justify-between text-sm font-semibold">
                                                     <span>{p.className}</span>
                                                     <span>{percent}%</span>
                                                 </div>

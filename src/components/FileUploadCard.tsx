@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 interface FileUploadCardProps {
   label: string;
@@ -63,7 +64,7 @@ export const FileUploadCard = ({
         </div>
 
         <div className="flex-1 flex flex-col justify-end">
-          <h4 className="font-bold text-lg mb-4">{label}</h4>
+          <h4 className="font-semibold text-lg mb-4">{label}</h4>
 
           <div className="relative group">
             <input
@@ -79,32 +80,45 @@ export const FileUploadCard = ({
           </div>
 
           {jsonData && classList.length > 0 && (
-            <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => setShowPreview(true)}>
-              Preview Labels
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-4 w-full flex items-center gap-2 rounded-full" 
+              onClick={() => setShowPreview(true)}
+            >
+              <Eye className="w-4 h-4" />
+              ดู Class Labels
             </Button>
           )}
         </div>
       </div>
 
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Class Preview ({classList.length} items)</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+              <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
+              Class Labels
+            </DialogTitle>
+            <DialogDescription>
+              รายการสายพันธุ์แมว {classList.length} ชนิดที่โมเดลสามารถจำแนกได้
+            </DialogDescription>
           </DialogHeader>
-          <div className="max-h-64 overflow-auto text-sm bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
-            {classList.length > 0 ? (
-              <ul className="list-decimal pl-5 space-y-1">
-                {classList.map((c, i) => (
-                  <li key={i}>{c}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">No class data found in file.</p>
-            )}
+          <div className="mt-4 space-y-2">
+            {classList.map((label, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
+              >
+                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                  {index + 1}
+                </span>
+                <span className="font-medium capitalize">
+                  {label.replace(/_/g, " ")}
+                </span>
+              </div>
+            ))}
           </div>
-          <DialogFooter>
-            <Button onClick={() => setShowPreview(false)}>Close</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

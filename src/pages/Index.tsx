@@ -29,7 +29,7 @@ const Index = () => {
                             Educational project for AI System Integration. Department of<br />
                             Computer and Information Sciences, KMUTNB.
                         </p>
-                        <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+                        <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                             Bethezank Lab &copy; 2026
                         </div>
                     </div>

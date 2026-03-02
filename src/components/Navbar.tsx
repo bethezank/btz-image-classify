@@ -1,21 +1,36 @@
 import { useEffect, useState } from "react";
 
+const THEME_KEY = "cat-breeds-theme";
+
+type Theme = "light" | "dark";
+
 export const Navbar = () => {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
-        // Check initial theory
-        if (document.documentElement.classList.contains("dark")) {
+        // Load theme from localStorage or system preference
+        const savedTheme = localStorage.getItem(THEME_KEY) as Theme | null;
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        
+        const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+        
+        if (shouldBeDark) {
+            document.documentElement.classList.add("dark");
             setIsDark(true);
+        } else {
+            document.documentElement.classList.remove("dark");
+            setIsDark(false);
         }
     }, []);
 
     const toggleDarkMode = () => {
         if (isDark) {
             document.documentElement.classList.remove("dark");
+            localStorage.setItem(THEME_KEY, "light");
             setIsDark(false);
         } else {
             document.documentElement.classList.add("dark");
+            localStorage.setItem(THEME_KEY, "dark");
             setIsDark(true);
         }
     };
@@ -26,7 +41,7 @@ export const Navbar = () => {
                 <div className="flex items-center gap-3">
                     <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
                     <div>
-                        <h1 className="font-bold text-lg leading-tight">Image Classification Platform</h1>
+                        <h1 className="font-semibold text-lg leading-tight">Image Classification Platform</h1>
                         <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Computer and Information Sciences, KMUTNB
                         </p>
