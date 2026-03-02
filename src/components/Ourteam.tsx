@@ -8,9 +8,11 @@ export default function Ourteam() {
                 <div className="space-y-6 group">
                     <div className="relative w-40 h-40 mx-auto">
                         <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/40 transition-colors"></div>
-                        <div className="relative w-full h-full rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center text-4xl font-semibold text-white shadow-xl">
-                            SY
-                        </div>
+                        <img
+                            src="/profile/bank.png"
+                            alt="Satienpong Yiengvanichchakul"
+                            className="relative w-full h-full rounded-full object-cover shadow-xl"
+                        />
                     </div>
                     <div>
                         <h4 className="text-xl font-semibold">Satienpong Yiengvanichchakul</h4>
@@ -22,9 +24,11 @@ export default function Ourteam() {
                 <div className="space-y-6 group">
                     <div className="relative w-40 h-40 mx-auto">
                         <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/40 transition-colors"></div>
-                        <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-4xl font-semibold text-white shadow-xl">
-                            JJ
-                        </div>
+                        <img
+                            src="/profile/mig.jpg"
+                            alt="Jirapas Jatejaroungkit"
+                            className="relative w-full h-full rounded-full object-cover shadow-xl"
+                        />
                     </div>
                     <div>
                         <h4 className="text-xl font-semibold">Jirapas Jatejaroungkit</h4>
