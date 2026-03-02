@@ -1,5 +1,7 @@
-// 13. onnxruntime-web
 import * as ort from 'onnxruntime-web';
+
+ort.env.wasm.wasmPaths = '/';
+ort.env.logLevel = 'fatal'; // // ระงับแจ้งเตือน Warning ของ onnx เพื่อป้องกันไม่ให้แสดงข้อความเตือน Error แดงใน console
 
 interface PredictionResult {
   className: string;
@@ -49,9 +51,9 @@ export const preprocessImage = async (
 
       for (let i = 0; i < imageData.data.length; i += 4) {
         // ลบ mean ต่อ channel
-        red.push(imageData.data[i]     - mean[0]); // R
-        green.push(imageData.data[i+1] - mean[1]); // G
-        blue.push(imageData.data[i+2] - mean[2]); // B
+        red.push(imageData.data[i] - mean[0]); // R
+        green.push(imageData.data[i + 1] - mean[1]); // G
+        blue.push(imageData.data[i + 2] - mean[2]); // B
       }
 
       // รวมเป็น [R...G...B...] -> NCHW

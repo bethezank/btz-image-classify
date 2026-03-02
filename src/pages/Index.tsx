@@ -11,6 +11,7 @@ import kmutnb_logo from "../../public/logo.png"
 import { FileUploadCard } from "@/components/FileUploadCard";
 import { PredictionResult } from "@/components/PredictionResult";
 import Ourteam from "@/components/Ourteam";
+import { BuiltInModels } from "@/components/BuiltInModels";
 
 // 14. onnxruntime-web
 import {
@@ -37,6 +38,7 @@ const Index = () => {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [classLabels, setClassLabels] = useState<string[]>([]);
+  const [activeBuiltInModel, setActiveBuiltInModel] = useState<string | null>(null);
 
   // 15. session
   const [session, setSession] = useState<InferenceSession | null>(null);
@@ -96,7 +98,11 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const inputTensor = await preprocessImage(imageFile);
+      // Looking at the console error, SqueezeNet in this specific ONNX file actually expects 224x224.
+      // So we lock the targetSize to 224.
+      const targetSize = 224;
+
+      const inputTensor = await preprocessImage(imageFile, targetSize);
       const results = await runInference(session, inputTensor, classLabels);
       setPredictions(results);
       toast({
@@ -121,11 +127,48 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <img src={kmutnb_logo} className="mb-4 h-40 mx-auto" />
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Image Classification Platform with Fine-Tuned Pretrained Models (Squeenzenet)</h1>
-          <p className="text-sm text-muted-foreground">
-            Computer Vision Final Project (2025) - Department of Computer and Information Sciences, Faculty of Applied Science (KMUTNB)
+          <h2 className="text-lg font-bold text-foreground mb-2">
+            AI System Integration
+          </h2>
+          <h1 className="text-3xl font-bold text-foreground mb-4">Image Classification Platform with Fine-Tuned Pretrained Models (GoogleNet)</h1>
+          <p className="text-md text-muted-foreground">
+            Department of Computer and Information Sciences, Faculty of Applied Science (KMUTNB)
           </p>
         </header>
+
+        {/* Built-in Model Selection */}
+        <BuiltInModels
+          activeModel={activeBuiltInModel}
+          onSelectModel={async (modelName, model, labels) => {
+            setActiveBuiltInModel(modelName);
+            setOnnxFile(model);
+            setClassFile(labels);
+            setSession(null);
+            setPredictions([]);
+
+            // Auto-load model
+            setIsLoading(true);
+            try {
+              const loadedSession = await loadONNXModel(model);
+              const loadedLabels = await loadClassLabels(labels);
+              setSession(loadedSession);
+              setClassLabels(loadedLabels);
+              toast({
+                title: "โหลดโมเดลสำเร็จ",
+                description: `โหลด ${modelName} และ Class Labels อัตโนมัติ พร้อมทำนายรูปภาพแล้ว`,
+              });
+            } catch (error) {
+              toast({
+                title: "เกิดข้อผิดพลาด",
+                description: "ไม่สามารถโหลดโมเดลอัตโนมัติได้",
+                variant: "destructive",
+              });
+              console.error(error);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        />
 
         {/* Download Sample Data Section */}
         <div className="flex justify-center mb-8">
@@ -135,13 +178,13 @@ const Index = () => {
             rel="noopener noreferrer"
           >
             <Button
-                size="default"
-                className="flex items-center gap-2"
-                variant="outline"
-              >
-                <DownloadIcon className="w-5 h-5" />
-                Download Example Data and Trained Model
-              </Button>
+              size="default"
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <DownloadIcon className="w-5 h-5" />
+              Download Example Data and Trained Model
+            </Button>
           </a>
         </div>
 
@@ -150,7 +193,10 @@ const Index = () => {
           <FileUploadCard
             label="ONNX Model"
             accept=".onnx"
-            onChange={setOnnxFile}
+            onChange={(file) => {
+              setOnnxFile(file);
+              setActiveBuiltInModel(null); // Reset active if manual upload
+            }}
             fileName={onnxFile?.name}
             icon={<Brain className="w-8 h-8 text-accent-foreground" />}
           />
@@ -164,7 +210,7 @@ const Index = () => {
           <FileUploadCard
             label="Image"
             accept="image/*"
-            onChange={ file => {setImageFile(file); setPredictions([])}}
+            onChange={file => { setImageFile(file); setPredictions([]) }}
             fileName={imageFile?.name}
             icon={<ImageIcon className="w-8 h-8 text-accent-foreground" />}
           />
@@ -217,7 +263,7 @@ const Index = () => {
       {/* 12. Our Team */}
       <Ourteam />
 
-      <div className="text-center text-xs text-muted-foreground pb-4">Bethezank Lab 2025</div>
+      <div className="text-center text-xs text-muted-foreground pb-4">Bethezank Lab 2026</div>
     </div>
   );
 };

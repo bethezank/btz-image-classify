@@ -14,10 +14,16 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     viteStaticCopy({
-      targets: [{
-        src: "node_modules/onnxruntime-web/dist/*.wasm",
-        dest: "."
-      }],
+      targets: [
+        {
+          src: "node_modules/onnxruntime-web/dist/*.wasm",
+          dest: "."
+        },
+        {
+          src: "node_modules/onnxruntime-web/dist/ort-wasm*.mjs",
+          dest: "."
+        }
+      ],
     }),
   ].filter(Boolean),
   resolve: {
