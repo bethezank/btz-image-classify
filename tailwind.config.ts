@@ -20,7 +20,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#6366f1", // overridden from design.html
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -57,6 +57,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "background-light": "#f8fafc",
+        "background-dark": "#0f172a",
+      },
+      fontFamily: {
+        display: ["Inter", "Noto Sans Thai Looped", "sans-serif"],
+        sans: ["Inter", "Noto Sans Thai Looped", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

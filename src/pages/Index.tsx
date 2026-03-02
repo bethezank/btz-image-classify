@@ -1,270 +1,138 @@
-// 1. react
 import { useState } from "react";
-
-// 2. ui components
-import { Brain, FileJson, Image as ImageIcon, Download as DownloadIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import kmutnb_logo from "../../public/logo.png"
-
-// 9. app components
-import { FileUploadCard } from "@/components/FileUploadCard";
-import { PredictionResult } from "@/components/PredictionResult";
+import { Navbar } from "@/components/Navbar";
+import { HeroCard } from "@/components/HeroCard";
+import { CustomModelCard } from "@/components/CustomModelCard";
 import Ourteam from "@/components/Ourteam";
-import { BuiltInModels } from "@/components/BuiltInModels";
-
-// 14. onnxruntime-web
-import {
-  loadONNXModel,
-  loadClassLabels,
-  preprocessImage,
-  runInference,
-} from "@/utils/onnxInference";
+import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
 import type { InferenceSession } from "onnxruntime-web";
 
-// 3. type
 interface Prediction {
   className: string;
   probability: number;
 }
 
 const Index = () => {
-
-  // 4. State
   const { toast } = useToast();
+
+  // State for Manual Upload
   const [onnxFile, setOnnxFile] = useState<File | null>(null);
   const [classFile, setClassFile] = useState<File | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [manualImageFile, setManualImageFile] = useState<File | null>(null);
+
+  // App State
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [classLabels, setClassLabels] = useState<string[]>([]);
   const [activeBuiltInModel, setActiveBuiltInModel] = useState<string | null>(null);
-
-  // 15. session
   const [session, setSession] = useState<InferenceSession | null>(null);
 
-  // 16. handleLoadModel
-  const handleLoadModel = async () => {
-    if (!onnxFile || !classFile) {
-      toast({
-        title: "ขาดไฟล์",
-        description: "กรุณาอัพโหลด ONNX model และ class labels",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const performLoad = async (model: File, labels: File) => {
     setIsLoading(true);
+    setPredictions([]);
     try {
-      const loadedSession = await loadONNXModel(onnxFile);
-      const labels = await loadClassLabels(classFile);
+      const loadedSession = await loadONNXModel(model);
+      const loadedLabels = await loadClassLabels(labels);
       setSession(loadedSession);
-      setClassLabels(labels);
+      setClassLabels(loadedLabels);
       toast({
-        title: "โหลดโมเดลสำเร็จ",
-        description: "พร้อมทำนายรูปภาพแล้ว",
+        title: "Model Initialized",
+        description: "System is ready for server-side inference simulation.",
       });
-    } catch (error) {
+    } catch (e) {
       toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดโมเดลได้",
-        variant: "destructive",
+        title: "Load Failed",
+        description: "Could not initialize ONNX session.",
+        variant: "destructive"
       });
-      console.error(error);
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 17. handlePredict
-  const handlePredict = async () => {
-    if (!session || !classLabels.length) {
-      toast({
-        title: "โมเดลยังไม่พร้อม",
-        description: "กรุณาโหลดโมเดลก่อน",
-        variant: "destructive",
-      });
+  const handleBuiltInLoad = async (name: string, model: File, labels: File) => {
+    setActiveBuiltInModel(name);
+    await performLoad(model, labels);
+  };
+
+  const handleManualLoad = async () => {
+    if (!onnxFile || !classFile) {
+      toast({ title: "Missing Files", description: "Please upload ONNX and JSON files.", variant: "destructive" });
       return;
     }
+    setActiveBuiltInModel(null);
+    await performLoad(onnxFile, classFile);
+  };
 
-    if (!imageFile) {
-      toast({
-        title: "ไม่มีรูปภาพ",
-        description: "กรุณาอัพโหลดรูปภาพ",
-        variant: "destructive",
-      });
+  const handlePredict = async (file?: File) => {
+    const targetFile = file || manualImageFile;
+    if (!session || !classLabels.length) {
+      toast({ title: "Model Not Ready", description: "Please load a model first.", variant: "destructive" });
+      return;
+    }
+    if (!targetFile) {
+      toast({ title: "Missing Image", description: "Please upload an image to analyze.", variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
     try {
-      // Looking at the console error, SqueezeNet in this specific ONNX file actually expects 224x224.
-      // So we lock the targetSize to 224.
-      const targetSize = 224;
-
-      const inputTensor = await preprocessImage(imageFile, targetSize);
+      const inputTensor = await preprocessImage(targetFile, 224);
       const results = await runInference(session, inputTensor, classLabels);
       setPredictions(results);
-      toast({
-        title: "ทำนายสำเร็จ",
-        description: `พบ ${results[0].className} ด้วยความแม่นยำ ${(results[0].probability * 100).toFixed(2)}%`,
-      });
     } catch (error) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถทำนายได้",
-        variant: "destructive",
-      });
+      toast({ title: "Analysis Failed", variant: "destructive" });
       console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 5. return
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <img src={kmutnb_logo} className="mb-4 h-40 mx-auto" />
-        <header className="text-center mb-12">
-          <h2 className="text-lg font-bold text-foreground mb-2">
-            AI System Integration
-          </h2>
-          <h1 className="text-3xl font-bold text-foreground mb-4">Image Classification Platform with Fine-Tuned Pretrained Models (GoogleNet)</h1>
-          <p className="text-md text-muted-foreground">
-            Department of Computer and Information Sciences, Faculty of Applied Science (KMUTNB)
-          </p>
-        </header>
+    <>
+      <Navbar />
 
-        {/* Built-in Model Selection */}
-        <BuiltInModels
+      <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
+        <HeroCard
           activeModel={activeBuiltInModel}
-          onSelectModel={async (modelName, model, labels) => {
-            setActiveBuiltInModel(modelName);
-            setOnnxFile(model);
-            setClassFile(labels);
-            setSession(null);
-            setPredictions([]);
-
-            // Auto-load model
-            setIsLoading(true);
-            try {
-              const loadedSession = await loadONNXModel(model);
-              const loadedLabels = await loadClassLabels(labels);
-              setSession(loadedSession);
-              setClassLabels(loadedLabels);
-              toast({
-                title: "โหลดโมเดลสำเร็จ",
-                description: `โหลด ${modelName} และ Class Labels อัตโนมัติ พร้อมทำนายรูปภาพแล้ว`,
-              });
-            } catch (error) {
-              toast({
-                title: "เกิดข้อผิดพลาด",
-                description: "ไม่สามารถโหลดโมเดลอัตโนมัติได้",
-                variant: "destructive",
-              });
-              console.error(error);
-            } finally {
-              setIsLoading(false);
-            }
+          onSelectModel={handleBuiltInLoad}
+          onPredict={async (file) => {
+            await handlePredict(file);
           }}
+          predictions={activeBuiltInModel !== null ? predictions : []}
+          isLoading={isLoading && activeBuiltInModel !== null}
         />
 
-        {/* Download Sample Data Section */}
-        <div className="flex justify-center mb-8">
-          <a
-            href="https://drive.google.com/file/d/149qX66Ezn9l7TQThieyKSutqJXIfrFc9/view?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              size="default"
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <DownloadIcon className="w-5 h-5" />
-              Download Example Data and Trained Model
-            </Button>
-          </a>
-        </div>
+        <CustomModelCard
+          onnxFile={onnxFile}
+          classFile={classFile}
+          imageFile={manualImageFile}
+          setOnnxFile={setOnnxFile}
+          setClassFile={setClassFile}
+          setImageFile={setManualImageFile}
+          onLoadModel={handleManualLoad}
+          onPredict={() => handlePredict()}
+          isLoading={isLoading && activeBuiltInModel === null}
+          hasSession={!!session}
+          predictions={activeBuiltInModel === null ? predictions : []}
+        />
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {/* 10. Upload Cards */}
-          <FileUploadCard
-            label="ONNX Model"
-            accept=".onnx"
-            onChange={(file) => {
-              setOnnxFile(file);
-              setActiveBuiltInModel(null); // Reset active if manual upload
-            }}
-            fileName={onnxFile?.name}
-            icon={<Brain className="w-8 h-8 text-accent-foreground" />}
-          />
-          <FileUploadCard
-            label="Class Labels (JSON)"
-            accept=".json"
-            onChange={setClassFile}
-            fileName={classFile?.name}
-            icon={<FileJson className="w-8 h-8 text-accent-foreground" />}
-          />
-          <FileUploadCard
-            label="Image"
-            accept="image/*"
-            onChange={file => { setImageFile(file); setPredictions([]) }}
-            fileName={imageFile?.name}
-            icon={<ImageIcon className="w-8 h-8 text-accent-foreground" />}
-          />
-        </div>
+        <Ourteam />
+      </main>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button
-            size="lg"
-            // 18. Event onClick
-            onClick={handleLoadModel}
-            disabled={isLoading || !onnxFile || !classFile}
-            className="min-w-[200px] flex items-center gap-2"
-          >
-            <Brain className="w-5 h-5" />
-            {/* 19. set button label */}
-            {isLoading && !session ? "Loading..." : "Load Model"}
-          </Button>
-          <Button
-            size="lg"
-            // 20. Event onClick
-            onClick={handlePredict}
-            disabled={isLoading || !session || !imageFile}
-            className="min-w-[200px] flex items-center gap-2"
-          >
-            <ImageIcon className="w-5 h-5" />
-            {/* 21. Button Label */}
-            {isLoading && session ? "Predicting..." : "Predict"}
-          </Button>
-        </div>
-
-        {imageFile && (
-          <div className="flex justify-center mb-8">
-            <img
-              src={URL.createObjectURL(imageFile)}
-              alt="Preview"
-              className="max-w-md rounded-lg shadow-lg border-2 border-border"
-            />
+      <footer className="mt-20 py-12 px-6 glass-card border-t border-white/20 dark:border-white/10 text-center">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+            CAT BREED CLASSIFIER PLATFORM &copy; 2026
           </div>
-        )}
-
-        {predictions.length > 0 && (
-          <div className="max-w-2xl mx-auto">
-            {/* 11. Prediction Result */}
-            <PredictionResult predictions={predictions} />
-          </div>
-        )}
-      </div>
-
-      {/* Our Team Section */}
-      {/* 12. Our Team */}
-      <Ourteam />
-
-      <div className="text-center text-xs text-muted-foreground pb-4">Bethezank Lab 2026</div>
-    </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-loose max-w-sm mx-auto">
+            Educational project for AI System Integration. Department of<br />
+            Computer and Information Sciences, KMUTNB.
+          </p>
+        </div>
+      </footer>
+    </>
   );
 };
 

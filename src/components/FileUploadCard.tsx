@@ -1,18 +1,14 @@
-// 6. Upload Card UI
 import { useState } from "react";
-import { Upload } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface FileUploadCardProps {
   label: string;
   accept: string;
   onChange: (file: File | null) => void;
   fileName?: string;
-  icon?: React.ReactNode;
+  iconName: string;
+  colorClass: string; // e.g. "blue", "purple", "pink"
 }
 
 export const FileUploadCard = ({
@@ -20,7 +16,8 @@ export const FileUploadCard = ({
   accept,
   onChange,
   fileName,
-  icon,
+  iconName,
+  colorClass,
 }: FileUploadCardProps) => {
   const [jsonData, setJsonData] = useState<unknown>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -35,7 +32,6 @@ export const FileUploadCard = ({
         try {
           const json = JSON.parse(event.target?.result as string);
           setJsonData(json);
-          // ถ้า json เป็น array ของ string ให้ set classList ทันที
           if (Array.isArray(json) && json.every(item => typeof item === "string")) {
             setClassList(json);
           } else {
@@ -53,47 +49,51 @@ export const FileUploadCard = ({
     }
   };
 
+  const colorStyles: Record<string, string> = {
+    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-500",
+    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-500",
+    pink: "bg-pink-50 dark:bg-pink-900/20 text-pink-500"
+  };
+
   return (
     <>
-      <Card className="border-2 border-dashed border-border hover:border-primary transition-colors">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
-              {icon || <Upload className="w-8 h-8 text-accent-foreground" />}
-            </div>
-            <div className="text-center">
-              <Label htmlFor={label} className="text-lg font-semibold block mb-2">
-                {label}
-              </Label>
-              {fileName && (
-                <p className="text-sm text-muted-foreground mb-2">
-                  {fileName}
-                </p>
-              )}
-            </div>
-            <Input
-              id={label}
+      <div className="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all text-center space-y-6 flex flex-col justify-between">
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto ${colorStyles[colorClass] || colorStyles.blue}`}>
+          <span className="material-symbols-rounded text-3xl">{iconName}</span>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-end">
+          <h4 className="font-bold text-lg mb-4">{label}</h4>
+
+          <div className="relative group">
+            <input
               type="file"
               accept={accept}
               onChange={handleFileChange}
-              className="cursor-pointer"
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
             />
-            {jsonData && classList.length > 0 && (
-              <Button variant="outline" className="mt-2" onClick={() => setShowPreview(true)}>
-                Preview
-              </Button>
-            )}
+            <div className={`bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs ${fileName ? 'text-primary' : 'text-slate-400'} flex justify-between items-center group-hover:bg-slate-100 transition-colors`}>
+              <span className="font-semibold whitespace-nowrap">Choose File</span>
+              <span className="truncate ml-2">{fileName || "No file chosen"}</span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          {jsonData && classList.length > 0 && (
+            <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => setShowPreview(true)}>
+              Preview Labels
+            </Button>
+          )}
+        </div>
+      </div>
+
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Class Preview ({classList.length} items)</DialogTitle>
           </DialogHeader>
-          <div className="max-h-64 overflow-auto">
+          <div className="max-h-64 overflow-auto text-sm bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
             {classList.length > 0 ? (
-              <ul className="list-disc pl-5">
+              <ul className="list-decimal pl-5 space-y-1">
                 {classList.map((c, i) => (
                   <li key={i}>{c}</li>
                 ))}
@@ -103,9 +103,7 @@ export const FileUploadCard = ({
             )}
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowPreview(false)}>
-              Close
-            </Button>
+            <Button onClick={() => setShowPreview(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
