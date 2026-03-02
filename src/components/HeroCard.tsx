@@ -1,33 +1,60 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
+import type { InferenceSession } from "onnxruntime-web";
+import { GoogleIcon } from "./icons/GoogleIcon";
 
-interface HeroCardProps {
-    activeModel: string | null;
-    onSelectModel: (modelName: string, onnxFile: File, classFile: File) => void;
-    onPredict: (image: File) => Promise<void>;
-    predictions: any[];
-    isLoading: boolean;
+interface Prediction {
+    className: string;
+    probability: number;
 }
 
-export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, isLoading }: HeroCardProps) => {
+export const HeroCard = () => {
+    const { toast } = useToast();
+
+    // Independent state for Built-in Model section
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [fetchingModel, setFetchingModel] = useState<string | null>(null);
-    const { toast } = useToast();
+    const [activeModel, setActiveModel] = useState<string | null>(null);
+    const [session, setSession] = useState<InferenceSession | null>(null);
+    const [classLabels, setClassLabels] = useState<string[]>([]);
+    const [predictions, setPredictions] = useState<Prediction[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleModelSelect = async (name: string, modelUrl: string, classUrl: string) => {
         setFetchingModel(name);
+        setIsLoading(true);
+        setPredictions([]);
+
         try {
             const [mRes, cRes] = await Promise.all([fetch(modelUrl), fetch(classUrl)]);
             const mBlob = await mRes.blob();
             const cBlob = await cRes.blob();
             const mFile = new File([mBlob], `${name}.onnx`, { type: "application/octet-stream" });
             const cFile = new File([cBlob], "labels.json", { type: "application/json" });
-            onSelectModel(name, mFile, cFile);
+
+            const loadedSession = await loadONNXModel(mFile);
+            const loadedLabels = await loadClassLabels(cFile);
+
+            setSession(loadedSession);
+            setClassLabels(loadedLabels);
+            setActiveModel(name);
+
+            toast({
+                title: "โมเดลพร้อมใช้งาน",
+                description: `${name} โหลดเสร็จสิ้น พร้อมทำนายรูปภาพ`,
+            });
         } catch (e) {
-            toast({ title: "Error", description: "Failed to load model", variant: "destructive" });
+            toast({
+                title: "Error",
+                description: "Failed to load model",
+                variant: "destructive"
+            });
+            console.error(e);
         } finally {
             setFetchingModel(null);
+            setIsLoading(false);
         }
     };
 
@@ -35,30 +62,65 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
         const file = e.target.files?.[0];
         if (file) {
             setSelectedImage(file);
+            setPredictions([]);
+        }
+    };
+
+    const handlePredict = async () => {
+        if (!session || !classLabels.length) {
+            toast({
+                title: "Model Not Ready",
+                description: "Please select a model first.",
+                variant: "destructive"
+            });
+            return;
+        }
+        if (!selectedImage) {
+            toast({
+                title: "Missing Image",
+                description: "Please upload an image to analyze.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const inputTensor = await preprocessImage(selectedImage, 224);
+            const results = await runInference(session, inputTensor, classLabels);
+            setPredictions(results);
+        } catch (error) {
+            toast({
+                title: "Analysis Failed",
+                variant: "destructive"
+            });
+            console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
+            <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
+                    <span className="material-symbols-rounded text-base">auto_awesome</span>
+                    Built-in Intelligence
+                </div>
+                <div className="space-y-4">
+                    <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
+                        ทดลองใช้โมเดลของเรา<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">เพื่อระบุสายพันธุ์แมว</span>
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
+                        ทดสอบการจำแนกสายพันธุ์แมวด้วยโมเดลเรา Fine-tune จาก GoogleNet หรือ SqueezeNet โดยตรงในบราวเซอร์ของคุณ
+                    </p>
+                </div>
+            </div>
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
                 {/* LEFT COLUMN: Controls */}
                 <div className="space-y-8">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
-                        <span className="material-symbols-rounded text-base">auto_awesome</span>
-                        Built-in Intelligence
-                    </div>
-
-                    <div className="space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                            ทดลองใช้ AI ของเรา<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">เพื่อระบุสายพันธุ์แมว</span>
-                        </h2>
-                        <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
-                            ทดสอบการจำแนกสายพันธุ์แมวด้วยโมเดลเรา Fine-tune จาก GoogleNet หรือ SqueezeNet โดยตรงในบราวเซอร์ของคุณ
-                        </p>
-                    </div>
-
                     <div className="space-y-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-slate-400">เลือกโมเดล</p>
                         <div className="flex flex-wrap gap-4">
@@ -66,15 +128,15 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                                 onClick={() => handleModelSelect("GoogleNet-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet-cat"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
-                                        : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
+                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
                                 {fetchingModel === "GoogleNet-cat" ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
-                                    <span className={`material-symbols-rounded ${activeModel === "GoogleNet-cat" ? "text-white" : "text-slate-400 group-hover:text-primary"}`}>developer_board</span>
-                                )}
+                                    <GoogleIcon className="w-5 h-5" />
+                                 )}
                                 <span className="font-semibold">GoogleNet</span>
                             </button>
 
@@ -82,8 +144,8 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                                 onClick={() => handleModelSelect("SqueezeNet-cat", "/models/trainedSqueezeNet-cat.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "SqueezeNet-cat"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
-                                        : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 border border-transparent"
+                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
                                 {fetchingModel === "SqueezeNet-cat" ? (
@@ -110,7 +172,7 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                     </div>
 
                     <button
-                        onClick={() => selectedImage && onPredict(selectedImage)}
+                        onClick={handlePredict}
                         disabled={!selectedImage || !activeModel || isLoading}
                         className="w-full md:w-auto px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
@@ -121,7 +183,6 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
 
                 {/* RIGHT COLUMN: Preview & Results */}
                 <div className="relative group min-h-[400px]">
-                    {/* <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div> */}
                     <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl h-full flex flex-col justify-between">
 
                         <div className="aspect-[4/3] relative flex items-center justify-center bg-slate-100 dark:bg-slate-800">
@@ -145,8 +206,7 @@ export const HeroCard = ({ activeModel, onSelectModel, onPredict, predictions, i
                                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
                                 </div>
                                 <div className="space-y-4">
-                                    {predictions.slice(0, 3).map((p, i) => {
-                                        // Assign colors to top 3
+                                    {predictions.slice(0, 5).map((p, i) => {
                                         const barColors = ["bg-primary", "bg-blue-400", "bg-purple-400"];
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (

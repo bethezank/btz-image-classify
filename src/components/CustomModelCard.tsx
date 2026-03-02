@@ -1,33 +1,114 @@
+import { useState } from "react";
 import { FileUploadCard } from "./FileUploadCard";
-import { Loader2, Image as ImageIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
+import type { InferenceSession } from "onnxruntime-web";
 
-interface CustomModelCardProps {
-    onnxFile: File | null;
-    classFile: File | null;
-    imageFile: File | null;
-    setOnnxFile: (file: File | null) => void;
-    setClassFile: (file: File | null) => void;
-    setImageFile: (file: File | null) => void;
-    onLoadModel: () => void;
-    onPredict: () => void;
-    isLoading: boolean;
-    hasSession: boolean;
-    predictions: any[];
+interface Prediction {
+    className: string;
+    probability: number;
 }
 
-export const CustomModelCard = ({
-    onnxFile,
-    classFile,
-    imageFile,
-    setOnnxFile,
-    setClassFile,
-    setImageFile,
-    onLoadModel,
-    onPredict,
-    isLoading,
-    hasSession,
-    predictions
-}: CustomModelCardProps) => {
+export const CustomModelCard = () => {
+    const { toast } = useToast();
+
+    // Independent state for Custom Model section
+    const [onnxFile, setOnnxFile] = useState<File | null>(null);
+    const [classFile, setClassFile] = useState<File | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [session, setSession] = useState<InferenceSession | null>(null);
+    const [classLabels, setClassLabels] = useState<string[]>([]);
+    const [predictions, setPredictions] = useState<Prediction[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasSession, setHasSession] = useState(false);
+
+    const handleLoadModel = async () => {
+        if (!onnxFile || !classFile) {
+            toast({ 
+                title: "Missing Files", 
+                description: "Please upload ONNX and JSON files.", 
+                variant: "destructive" 
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        setPredictions([]);
+
+        try {
+            const loadedSession = await loadONNXModel(onnxFile);
+            const loadedLabels = await loadClassLabels(classFile);
+            setSession(loadedSession);
+            setClassLabels(loadedLabels);
+            setHasSession(true);
+            toast({
+                title: "Model Registered",
+                description: "Custom model is ready for inference.",
+            });
+        } catch (e) {
+            toast({
+                title: "Load Failed",
+                description: "Could not initialize ONNX session.",
+                variant: "destructive"
+            });
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePredict = async () => {
+        if (!session || !classLabels.length) {
+            toast({ 
+                title: "Model Not Ready", 
+                description: "Please load a model first.", 
+                variant: "destructive" 
+            });
+            return;
+        }
+        if (!imageFile) {
+            toast({ 
+                title: "Missing Image", 
+                description: "Please upload an image to analyze.", 
+                variant: "destructive" 
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const inputTensor = await preprocessImage(imageFile, 224);
+            const results = await runInference(session, inputTensor, classLabels);
+            setPredictions(results);
+        } catch (error) {
+            toast({ 
+                title: "Analysis Failed", 
+                variant: "destructive" 
+            });
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSetOnnxFile = (file: File | null) => {
+        setOnnxFile(file);
+        setHasSession(false);
+        setPredictions([]);
+    };
+
+    const handleSetClassFile = (file: File | null) => {
+        setClassFile(file);
+        setHasSession(false);
+        setPredictions([]);
+    };
+
+    const handleSetImageFile = (file: File | null) => {
+        setImageFile(file);
+        setPredictions([]);
+    };
+
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
             <div className="flex flex-col items-start gap-2 mb-6">
@@ -41,7 +122,7 @@ export const CustomModelCard = ({
                         <FileUploadCard
                             label="ONNX Model"
                             accept=".onnx"
-                            onChange={setOnnxFile}
+                            onChange={handleSetOnnxFile}
                             fileName={onnxFile?.name}
                             iconName="psychology"
                             colorClass="blue"
@@ -49,7 +130,7 @@ export const CustomModelCard = ({
                         <FileUploadCard
                             label="Class Labels (JSON)"
                             accept=".json"
-                            onChange={setClassFile}
+                            onChange={handleSetClassFile}
                             fileName={classFile?.name}
                             iconName="description"
                             colorClass="purple"
@@ -57,7 +138,7 @@ export const CustomModelCard = ({
                         <FileUploadCard
                             label="Target Image"
                             accept="image/*"
-                            onChange={setImageFile}
+                            onChange={handleSetImageFile}
                             fileName={imageFile?.name}
                             iconName="image"
                             colorClass="pink"
@@ -66,14 +147,14 @@ export const CustomModelCard = ({
 
                     <div className="flex flex-col sm:flex-row gap-4">
                         <button
-                            onClick={onLoadModel}
+                            onClick={handleLoadModel}
                             disabled={isLoading || !onnxFile || !classFile}
                             className="flex-1 px-8 py-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm"
                         >
                             {isLoading && !hasSession ? "Registering..." : "1. Register Model"}
                         </button>
                         <button
-                            onClick={onPredict}
+                            onClick={handlePredict}
                             disabled={isLoading || !hasSession || !imageFile}
                             className="flex-1 px-8 py-4 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/30 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 disabled:hover:translate-y-0"
                         >
