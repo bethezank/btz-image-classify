@@ -9,7 +9,7 @@ This is a **web-based AI application** that classifies 10 cat breeds using deep 
 - **Educational Project:** Department of Computer and Information Sciences, KMUTNB
 
 ### Key Features
-- **Built-in Models:** Pre-trained GoogleNet and SqueezeNet models for cat breed classification
+- **Built-in Models:** Pre-trained GoogleNet and ResNet-50 models for cat breed classification
 - **Custom Model Support:** Users can upload their own ONNX models and class label files
 - **Client-side Inference:** All ML inference runs in the browser using ONNX Runtime Web
 - **Bilingual UI:** Thai and English mixed interface (primary: Thai)
@@ -244,7 +244,9 @@ npx shadcn add <component-name>
 This installs the component to `src/components/ui/`
 
 ### Updating ONNX Models
-Replace files in `/public/models/` and update references in `HeroCard.tsx`
+Place model files in `/public/models/`:
+- `cat-10breeds-net-google.onnx` - GoogleNet model
+- `cat-10breeds-net-resnet50.onnx` - ResNet-50 model
 
 ### Adding New Class Labels
 Update `/public/classes/classNames-cat.json` with array of class names

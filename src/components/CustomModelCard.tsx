@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FileUploadCard } from "./FileUploadCard";
-import { Loader2, Eye, Upload } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadONNXModel, loadClassLabels, preprocessImage, runInference } from "@/utils/onnxInference";
 import type { InferenceSession } from "onnxruntime-web";
@@ -121,12 +121,11 @@ export const CustomModelCard = () => {
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
             <div className="flex flex-col items-start gap-2 mb-6">
-                <h3 className="text-2xl font-semibold mb-3 flex items-center justify-center gap-2">
-                    <Upload className="w-7 h-7 text-primary" />
-                    เลือกใช้โมเดล AI ของคุณ
+                <h3 className="text-2xl font-semibold">
+                    เลือกใช้โมเดล AI ของคุณเองได้ทันที
                 </h3>
                 <p className="text-muted-foreground text-base">
-                    เลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)
+                    ถ้าคุณมีความสนใจในภาพประเภทอื่น สามารถเลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)
                 </p>
             </div>
             <div className="grid lg:grid-cols-2 gap-12 justify-center items-start">
@@ -222,15 +221,15 @@ export const CustomModelCard = () => {
                 </div>
 
                 {/* RIGHT COLUMN: Preview & Results */}
-                <div className="relative group min-h-[400px]">
-                    <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl h-full flex flex-col justify-between">
+                <div className="relative group">
+                    <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col">
 
-                        <div className="aspect-[4/3] relative flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+                        <div className={`relative flex items-center justify-center bg-slate-100 dark:bg-slate-800 ${!imageFile ? "aspect-[4/3]" : ""}`}>
                             {imageFile ? (
                                 <img
                                     src={URL.createObjectURL(imageFile)}
                                     alt="Cat Preview"
-                                    className="max-w-full max-h-full object-contain"
+                                    className="w-full h-auto"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
@@ -241,7 +240,7 @@ export const CustomModelCard = () => {
                         </div>
 
                         {predictions.length > 0 && !isLoading && (
-                            <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-4">
+                            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
                                 </div>
@@ -251,11 +250,11 @@ export const CustomModelCard = () => {
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (
                                             <div key={i} className="space-y-2">
-                                                <div className="flex justify-between text-sm font-semibold">
+                                                <div className="flex justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
                                                     <span>{p.className}</span>
                                                     <span>{percent}%</span>
                                                 </div>
-                                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                     <div className={`h-full ${barColors[i] || "bg-slate-400"} rounded-full`} style={{ width: `${percent}%` }}></div>
                                                 </div>
                                             </div>

@@ -1,7 +1,3 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Eye } from "lucide-react";
 
 interface FileUploadCardProps {
   label: string;
@@ -20,34 +16,9 @@ export const FileUploadCard = ({
   iconName,
   colorClass,
 }: FileUploadCardProps) => {
-  const [jsonData, setJsonData] = useState<unknown>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [classList, setClassList] = useState<string[]>([]);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     onChange(file);
-    if (file && file.type === "application/json") {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const json = JSON.parse(event.target?.result as string);
-          setJsonData(json);
-          if (Array.isArray(json) && json.every(item => typeof item === "string")) {
-            setClassList(json);
-          } else {
-            setClassList([]);
-          }
-        } catch {
-          setJsonData(null);
-          setClassList([]);
-        }
-      };
-      reader.readAsText(file);
-    } else {
-      setJsonData(null);
-      setClassList([]);
-    }
   };
 
   const colorStyles: Record<string, string> = {
@@ -79,48 +50,8 @@ export const FileUploadCard = ({
             </div>
           </div>
 
-          {jsonData && classList.length > 0 && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-4 w-full flex items-center gap-2 rounded-full" 
-              onClick={() => setShowPreview(true)}
-            >
-              <Eye className="w-4 h-4" />
-              ดู Class Labels
-            </Button>
-          )}
         </div>
       </div>
-
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
-              Class Labels
-            </DialogTitle>
-            <DialogDescription>
-              รายการสายพันธุ์แมว {classList.length} ชนิดที่โมเดลสามารถจำแนกได้
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 space-y-2">
-            {classList.map((label, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
-              >
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
-                  {index + 1}
-                </span>
-                <span className="font-medium capitalize">
-                  {label.replace(/_/g, " ")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

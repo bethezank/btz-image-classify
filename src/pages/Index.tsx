@@ -14,6 +14,26 @@ const Index = () => {
                 <Navbar />
 
                 <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
+
+                    <div className="lg:mb-24 flex flex-col md:flex-row items-center justify-between gap-8 relative min-h-[220px]">
+                        <div className="space-y-4 relative z-10 max-w-2xl">
+                            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
+                                จำแนกสายพันธุ์แมวแม่นยำด้วยนวัตกรรม AI บนเว็บคุณ</h2>
+                            <p className="text-slate-600 dark:text-slate-400 text-2xl tracking-tight max-w-md">
+                                เพียงอัปโหลดรูปภาพ ระบบ AI จะช่วยวิเคราะห์สายพันธุ์เจ้าเหมียวให้คุณในทันที
+                            </p>
+                        </div>
+
+                        {/* Mascot */}
+                        <div className="hidden md:block absolute right-0 lg:right-10 -bottom-24 md:-bottom-60 lg:-bottom-80 -z-10 mascot-float pointer-events-none">
+                            <img
+                                src="/cat-classify_transparent.webp"
+                                alt="Cat Mascot"
+                                className="w-[450px] md:w-[500px] lg:w-[600px] h-auto drop-shadow-2xl opacity-90"
+                            />
+                        </div>
+                    </div>
+
                     {/* Built-in Model Section - Independent */}
                     <HeroCard />
 

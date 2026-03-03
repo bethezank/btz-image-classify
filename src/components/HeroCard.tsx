@@ -126,21 +126,17 @@ export const HeroCard = () => {
 
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
-
-            <div className="mb-6 space-y-4">
+            <div className="flex flex-col items-start gap-2 mb-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
                     <span className="material-symbols-rounded text-base">auto_awesome</span>
                     Built-in Intelligence
                 </div>
-                <div className="space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
-                        ทดลองใช้โมเดลของเรา<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">เพื่อระบุสายพันธุ์แมว</span>
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
-                        ทดสอบการจำแนกสายพันธุ์แมวด้วยโมเดลเรา Fine-tune จาก GoogleNet หรือ SqueezeNet โดยตรงในบราวเซอร์ของคุณ
-                    </p>
-                </div>
+                <h3 className="text-2xl font-semibold">
+                    ทดลองใช้โมเดลของเราเพื่อระบุสายพันธุ์แมว
+                </h3>
+                <p className="text-muted-foreground text-base">
+                    ทดสอบการจำแนกสายพันธุ์แมวด้วยโมเดลที่ผ่านการ Fine-tune ที่มีพื้นฐานจาก GoogleNet หรือ ResNet-50 ได้โดยตรงในบราวเซอร์ของคุณ
+                </p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -152,51 +148,35 @@ export const HeroCard = () => {
                         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">เลือกโมเดล</p>
                         <div className="flex flex-wrap gap-4">
                             <button
-                                onClick={() => handleModelSelect("GoogleNet-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
+                                onClick={() => handleModelSelect("GoogleNet", "/models/cat-10breeds-net-google.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
-                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet-cat"
+                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet"
                                     ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
                                     : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
-                                {fetchingModel === "GoogleNet-cat" ? (
+                                {fetchingModel === "GoogleNet" ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <GoogleIcon className="w-5 h-5" />
                                 )}
-                                <span className="font-semibold">GoogleNet (Original)</span>
+                                <span className="font-semibold">GoogleNet</span>
                             </button>
 
                             <button
-                                onClick={() => handleModelSelect("SqueezeNet-cat", "/models/trainedSqueezeNet-cat.onnx", "/classes/classNames-cat.json")}
+                                onClick={() => handleModelSelect("ResNet-50", "/models/cat-10breeds-net-resnet50.onnx", "/classes/classNames-cat.json")}
                                 disabled={!!fetchingModel}
-                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "SqueezeNet-cat"
+                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "ResNet-50"
                                     ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
                                     : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
                                     }`}
                             >
-                                {fetchingModel === "SqueezeNet-cat" ? (
+                                {fetchingModel === "ResNet-50" ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
-                                    <span className={`material-symbols-rounded ${activeModel === "SqueezeNet-cat" ? "text-white" : "text-slate-400 group-hover:text-primary"}`}>memory</span>
+                                    <span className={`material-symbols-rounded ${activeModel === "ResNet-50" ? "text-white" : "text-slate-400 group-hover:text-primary"}`}>layers</span>
                                 )}
-                                <span className="font-semibold">SqueezeNet</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleModelSelect("GoogleNet-FT-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
-                                disabled={!!fetchingModel}
-                                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet-FT-cat"
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
-                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
-                                    }`}
-                            >
-                                {fetchingModel === "GoogleNet-FT-cat" ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <GoogleIcon className="w-5 h-5" />
-                                )}
-                                <span className="font-semibold">GoogleNet (Fine-Tune)</span>
+                                <span className="font-semibold">ResNet-50</span>
                             </button>
                         </div>
                     </div>
@@ -268,15 +248,15 @@ export const HeroCard = () => {
                 </div>
 
                 {/* RIGHT COLUMN: Preview & Results */}
-                <div className="relative group min-h-[400px]">
-                    <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl h-full flex flex-col justify-between">
+                <div className="relative group">
+                    <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col">
 
-                        <div className="aspect-[4/3] relative flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+                        <div className={`relative flex items-center justify-center bg-slate-100 dark:bg-slate-800 ${!selectedImage ? "aspect-[4/3]" : ""}`}>
                             {selectedImage ? (
                                 <img
                                     src={URL.createObjectURL(selectedImage)}
                                     alt="Cat Preview"
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-auto"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
@@ -287,7 +267,7 @@ export const HeroCard = () => {
                         </div>
 
                         {predictions.length > 0 && !isLoading && (
-                            <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-4">
+                            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
                                 </div>
@@ -297,11 +277,11 @@ export const HeroCard = () => {
                                         const percent = (p.probability * 100).toFixed(1);
                                         return (
                                             <div key={i} className="space-y-2">
-                                                <div className="flex justify-between text-sm font-semibold">
+                                                <div className="flex justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
                                                     <span>{p.className}</span>
                                                     <span>{percent}%</span>
                                                 </div>
-                                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                     <div className={`h-full ${barColors[i] || "bg-slate-400"} rounded-full`} style={{ width: `${percent}%` }}></div>
                                                 </div>
                                             </div>

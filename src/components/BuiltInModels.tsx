@@ -60,33 +60,33 @@ export const BuiltInModels = ({ activeModel, onSelectModel }: BuiltInModelsProps
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button
-                    variant={activeModel === "GoogleNet-cat" ? "default" : "secondary"}
+                    variant={activeModel === "GoogleNet" ? "default" : "secondary"}
                     size="lg"
-                    onClick={() => handleSelect("GoogleNet-cat", "/models/trainedGoogleNet-cat.onnx", "/classes/classNames-cat.json")}
+                    onClick={() => handleSelect("GoogleNet", "/models/cat-10breeds-net-google.onnx", "/classes/classNames-cat.json")}
                     disabled={isLoading !== null}
-                    className={`flex-1 max-w-sm flex items-center gap-2 h-14 text-base font-medium transition-colors ${activeModel === "GoogleNet-cat" ? "ring-2 ring-primary ring-offset-2" : "hover:bg-primary hover:text-primary-foreground"}`}
+                    className={`flex-1 max-w-sm flex items-center gap-2 h-14 text-base font-medium transition-colors ${activeModel === "GoogleNet" ? "ring-2 ring-primary ring-offset-2" : "hover:bg-primary hover:text-primary-foreground"}`}
                 >
-                    {isLoading === "GoogleNet-cat" ? (
+                    {isLoading === "GoogleNet" ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                         <Download className="w-5 h-5" />
                     )}
-                    {isLoading === "GoogleNet-cat" ? "กำลังดาวน์โหลด..." : "ใช้โมเดล GoogleNet"}
+                    {isLoading === "GoogleNet" ? "กำลังดาวน์โหลด..." : "ใช้โมเดล GoogleNet"}
                 </Button>
 
                 <Button
-                    variant={activeModel === "SqueezeNet-cat" ? "default" : "secondary"}
+                    variant={activeModel === "ResNet-50" ? "default" : "secondary"}
                     size="lg"
-                    onClick={() => handleSelect("SqueezeNet-cat", "/models/trainedSqueezeNet-cat.onnx", "/classes/classNames-cat.json")}
+                    onClick={() => handleSelect("ResNet-50", "/models/cat-10breeds-net-resnet50.onnx", "/classes/classNames-cat.json")}
                     disabled={isLoading !== null}
-                    className={`flex-1 max-w-sm flex items-center gap-2 h-14 text-base font-medium transition-colors ${activeModel === "SqueezeNet-cat" ? "ring-2 ring-primary ring-offset-2" : "hover:bg-primary hover:text-primary-foreground"}`}
+                    className={`flex-1 max-w-sm flex items-center gap-2 h-14 text-base font-medium transition-colors ${activeModel === "ResNet-50" ? "ring-2 ring-primary ring-offset-2" : "hover:bg-primary hover:text-primary-foreground"}`}
                 >
-                    {isLoading === "SqueezeNet-cat" ? (
+                    {isLoading === "ResNet-50" ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                         <Download className="w-5 h-5" />
                     )}
-                    {isLoading === "SqueezeNet-cat" ? "กำลังดาวน์โหลด..." : "ใช้โมเดล SqueezeNet"}
+                    {isLoading === "ResNet-50" ? "กำลังดาวน์โหลด..." : "ใช้โมเดล ResNet-50"}
                 </Button>
             </div>
         </div>
