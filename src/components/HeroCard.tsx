@@ -31,6 +31,7 @@ export const HeroCard = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [builtInClassLabels, setBuiltInClassLabels] = useState<string[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'summary' | 'comparison'>('summary');
 
     // Load built-in class labels on mount
     useEffect(() => {
@@ -131,7 +132,7 @@ export const HeroCard = () => {
                     <span className="material-symbols-rounded text-base">auto_awesome</span>
                     Built-in Intelligence
                 </div>
-                <h3 className="text-2xl font-semibold">
+                <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
                     ทดลองใช้โมเดลของเราเพื่อระบุสายพันธุ์แมว
                 </h3>
                 <p className="text-muted-foreground text-base">
@@ -152,7 +153,7 @@ export const HeroCard = () => {
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "GoogleNet"
                                     ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
-                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
+                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group text-slate-700 dark:text-slate-200"
                                     }`}
                             >
                                 {fetchingModel === "GoogleNet" ? (
@@ -160,7 +161,7 @@ export const HeroCard = () => {
                                 ) : (
                                     <GoogleIcon className="w-5 h-5" />
                                 )}
-                                <span className="font-semibold">GoogleNet</span>
+                                <span className="font-semibold">GoogLeNet</span>
                             </button>
 
                             <button
@@ -168,7 +169,7 @@ export const HeroCard = () => {
                                 disabled={!!fetchingModel}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all shadow-sm ${activeModel === "ResNet-50"
                                     ? "bg-primary text-white shadow-lg shadow-primary/20 border border-transparent"
-                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group"
+                                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary group text-slate-700 dark:text-slate-200"
                                     }`}
                             >
                                 {fetchingModel === "ResNet-50" ? (
@@ -178,6 +179,116 @@ export const HeroCard = () => {
                                 )}
                                 <span className="font-semibold">ResNet-50</span>
                             </button>
+                        </div>
+
+                        <div>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button className="inline-flex items-center gap-2 text-xs font-medium px-4 py-1.5 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary rounded-full transition-colors shadow-sm">
+                                        <span className="material-symbols-rounded text-[16px]">info</span>
+                                        ข้อมูลความแม่นยำของโมเดล
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-2xl text-center md:text-left text-slate-900 dark:text-white">ข้อมูลความแม่นยำของโมเดล</DialogTitle>
+                                        <DialogDescription className="text-center md:text-left text-slate-600 dark:text-slate-400">
+                                            เปรียบเทียบประสิทธิภาพระหว่าง GoogLeNet และ ResNet-50
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <div className="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 mt-6 max-w-sm mx-auto md:mx-0">
+                                        <button
+                                            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'summary' ? 'bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                                            onClick={() => setActiveTab('summary')}
+                                        >
+                                            <span className="material-symbols-rounded text-[18px]">analytics</span>
+                                            Summary
+                                        </button>
+                                        <button
+                                            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'comparison' ? 'bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                                            onClick={() => setActiveTab('comparison')}
+                                        >
+                                            <span className="material-symbols-rounded text-[18px]">compare_arrows</span>
+                                            Model comparison
+                                        </button>
+                                    </div>
+
+                                    {activeTab === 'summary' ? (
+                                        <div className="mt-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                                            <div className="w-full rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm">
+                                                <img src="/results/compare.webp" alt="Model Accuracy Summary" className="w-full h-auto object-contain" />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid md:grid-cols-2 gap-8 mt-6 animate-in fade-in zoom-in-95 duration-200">
+                                            {/* GoogLeNet Column */}
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                                    <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500">
+                                                        <GoogleIcon className="w-5 h-5" />
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">GoogLeNet</h3>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-rounded text-[18px] text-slate-400">grid_on</span>
+                                                            <h4 className="font-semibold text-sm text-slate-600 dark:text-slate-400 uppercase tracking-wider">Confusion Matrix</h4>
+                                                        </div>
+                                                        <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-transform hover:scale-[1.02]">
+                                                            <img src="/results/google-matrix.png" alt="GoogLeNet Confusion Matrix" className="w-full h-auto rounded-xl" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-rounded text-[18px] text-slate-400">bar_chart</span>
+                                                            <h4 className="font-semibold text-sm text-slate-600 dark:text-slate-400 uppercase tracking-wider">Classification Report</h4>
+                                                        </div>
+                                                        <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-transform hover:scale-[1.02]">
+                                                            <img src="/results/google-score.png" alt="GoogLeNet Score" className="w-full h-auto rounded-xl" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* ResNet-50 Column */}
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                        <span className="material-symbols-rounded">layers</span>
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">ResNet-50</h3>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-rounded text-[18px] text-slate-400">grid_on</span>
+                                                            <h4 className="font-semibold text-sm text-slate-600 dark:text-slate-400 uppercase tracking-wider">Confusion Matrix</h4>
+                                                        </div>
+                                                        <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-transform hover:scale-[1.02]">
+                                                            <img src="/results/resnet50-matrix.png" alt="ResNet-50 Confusion Matrix" className="w-full h-auto rounded-xl" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-rounded text-[18px] text-slate-400">bar_chart</span>
+                                                            <h4 className="font-semibold text-sm text-slate-600 dark:text-slate-400 uppercase tracking-wider">Classification Report</h4>
+                                                        </div>
+                                                        <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-transform hover:scale-[1.02]">
+                                                            <img src="/results/resnet50-score.png" alt="ResNet-50 Score" className="w-full h-auto rounded-xl" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
 
@@ -194,8 +305,8 @@ export const HeroCard = () => {
                                         <span className="font-semibold">ดู Class Labels</span>
                                     </button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-                                    <DialogHeader>
+                                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+                                    <DialogHeader className="sticky top-0 z-10 bg-background pb-2 border-b border-border">
                                         <DialogTitle className="flex items-center gap-2">
                                             <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
                                             Class Labels
@@ -204,7 +315,7 @@ export const HeroCard = () => {
                                             รายการสายพันธุ์แมว 10 ชนิดที่โมเดลสามารถจำแนกได้
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <div className="mt-4 space-y-2">
+                                    <div className="mt-4 space-y-2 overflow-y-auto flex-1 pr-1">
                                         {builtInClassLabels.map((label, index) => (
                                             <div
                                                 key={index}
@@ -213,7 +324,7 @@ export const HeroCard = () => {
                                                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
                                                     {index + 1}
                                                 </span>
-                                                <span className="font-medium capitalize">
+                                                <span className="font-medium capitalize text-slate-700 dark:text-slate-200">
                                                     {label.replace(/_/g, " ")}
                                                 </span>
                                             </div>
@@ -269,7 +380,7 @@ export const HeroCard = () => {
                         {predictions.length > 0 && !isLoading && (
                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ผลการทำนาย</span>
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">ANALYSIS RESULTS</span>
                                 </div>
                                 <div className="space-y-4">
                                     {predictions.slice(0, 5).map((p, i) => {

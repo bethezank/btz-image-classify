@@ -7,17 +7,17 @@ const Index = () => {
     return (
         <div className="relative min-h-screen overflow-hidden">
             {/* Background Layer */}
-            <div className="fixed inset-0 z-[-2] lab-bg opacity-40" />
+            <div className="fixed inset-0 z-[-2] lab-bg opacity-20" />
 
             {/* Content Layer */}
             <div className="relative z-[0]">
                 <Navbar />
 
-                <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-12">
 
-                    <div className="lg:mb-24 flex flex-col md:flex-row items-center justify-between gap-8 relative min-h-[220px]">
+                    <div className="relative mb-40 sm:mb-24 flex flex-col md:flex-row items-center justify-between gap-8 min-h-[220px]">
                         <div className="space-y-4 relative z-10 max-w-2xl">
-                            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
+                            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-white">
                                 จำแนกสายพันธุ์แมวแม่นยำด้วยนวัตกรรม AI บนเว็บคุณ</h2>
                             <p className="text-slate-600 dark:text-slate-400 text-2xl tracking-tight max-w-md">
                                 เพียงอัปโหลดรูปภาพ ระบบ AI จะช่วยวิเคราะห์สายพันธุ์เจ้าเหมียวให้คุณในทันที
@@ -25,11 +25,11 @@ const Index = () => {
                         </div>
 
                         {/* Mascot */}
-                        <div className="hidden md:block absolute right-0 lg:right-10 -bottom-24 md:-bottom-60 lg:-bottom-80 -z-10 mascot-float pointer-events-none">
+                        <div className="absolute -right-10 lg:right-10 -bottom-80 md:-bottom-60 lg:-bottom-80 -z-10 mascot-float pointer-events-none">
                             <img
                                 src="/cat-classify_transparent.webp"
                                 alt="Cat Mascot"
-                                className="w-[450px] md:w-[500px] lg:w-[600px] h-auto drop-shadow-2xl opacity-90"
+                                className="w-[400px] md:w-[500px] lg:w-[600px] h-auto drop-shadow-2xl opacity-90"
                             />
                         </div>
                     </div>

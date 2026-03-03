@@ -121,14 +121,14 @@ export const CustomModelCard = () => {
     return (
         <section className="glass-card rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
             <div className="flex flex-col items-start gap-2 mb-6">
-                <h3 className="text-2xl font-semibold">
+                <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
                     เลือกใช้โมเดล AI ของคุณเองได้ทันที
                 </h3>
                 <p className="text-muted-foreground text-base">
                     ถ้าคุณมีความสนใจในภาพประเภทอื่น สามารถเลือกใช้โมเดลของคุณเพื่อวิเคราะห์รูปภาพที่เป็นนามสกุล onnx และ class labels (json)
                 </p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-12 justify-center items-start">
+            <div className="grid sm:grid-cols-2 gap-12 justify-center items-start">
                 <div className="space-y-8 text-left">
 
                     <div className="grid gap-6">
@@ -171,8 +171,8 @@ export const CustomModelCard = () => {
                                         <span className="font-semibold">ดู Class Labels</span>
                                     </button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-                                    <DialogHeader>
+                                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+                                    <DialogHeader className="sticky top-0 z-10 bg-background pb-2 border-b border-border">
                                         <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
                                             <span className="material-symbols-rounded text-primary">format_list_bulleted</span>
                                             Class Labels
@@ -181,7 +181,7 @@ export const CustomModelCard = () => {
                                             รายการสายพันธุ์แมว {classLabels.length} ชนิดที่โมเดลสามารถจำแนกได้
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <div className="mt-4 space-y-2">
+                                    <div className="mt-4 space-y-2 overflow-y-auto flex-1 pr-1">
                                         {classLabels.map((label, index) => (
                                             <div
                                                 key={index}
@@ -190,7 +190,7 @@ export const CustomModelCard = () => {
                                                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
                                                     {index + 1}
                                                 </span>
-                                                <span className="font-medium capitalize">
+                                                <span className="font-medium capitalize text-slate-700 dark:text-slate-200">
                                                     {label.replace(/_/g, " ")}
                                                 </span>
                                             </div>
