@@ -46,8 +46,7 @@ const Index = () => {
                 <footer className="mt-20 py-12 px-6 glass-card border-t border-white/20 dark:border-white/10 text-center">
                     <div className="max-w-2xl mx-auto space-y-6">
                         <p className="text-xs text-slate-500 dark:text-slate-400 leading-loose max-w-sm mx-auto">
-                            Educational project for AI System Integration. Department of<br />
-                            Computer and Information Sciences, KMUTNB.
+                            Department of Computer and Information Sciences, KMUTNB.
                         </p>
                         <div className="inline-block px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/5 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                             Bethezank Lab &copy; 2026
